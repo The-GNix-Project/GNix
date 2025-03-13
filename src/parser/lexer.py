@@ -52,52 +52,59 @@ class _TokenTypes:
 tokenTypes = _TokenTypes()
 
 TOKEN_MAPS = [
-    ('INTEGER',     r'-?\b\d+\b'),                          # Integer
-    ('STRING',      r'"(?:\\.|[^"\\])*"'),                  # String literal with escapes
-    ('BOOL',        r'\b(true|false)\b'),                   # Boolean 
-    ('NULL',        r'\bnull\b'),                           # NULL
-    ('FLOAT',       r'-?\b\d+(\.\d+)?([eE][+-]?\d+)?\b'),   # floating point number
-    ('PATH',        r'(\./|/)[a-zA-Z0-9_\-./]+'),           # Nix Path datatype
-    ('KEYWORD',     KEYWORD_REGEX),                         # Keyword
-    ('IDENTIFIER',  IDENTIFIER_REGEX),                      # Identifiers
-    ('LBRACE',      r'\{'),                                 # Left brace
-    ('RBRACE',      r'\}'),                                 # Right brace
-    ('LPAREN',      r'\('),                                 # Left parenthesis
-    ('RPAREN',      r'\)'),                                 # Right parenthesis
-    ('LSPAREN',     r'\['),                                 # Left parenthesis
-    ('RSPAREN',     r'\]'),                                 # Right parenthesis
-    ('COMMA',       r'\,'),                                 # Comma
-    ('EQ',          r'='),                                  # Equals sign
-    ('COLON',       r':'),                                  # Colon
-    ('SEMICOLON',   r';'),                                  # Semicolon
-    ('ELLIPSE',      r'\.\.\.'),                            # ELlipse
-    ('WHITESPACE',  r'\s+'),                                # Whitespace (ignored)
-    ('COMMENT',     r'#.*'),                                # Comment (ignored)
+    ('FLOAT',       r'-?\b\d+\.\d+([eE][+-]?\d+)?\b|-?\b\d+[eE][+-]?\d+\b'),# floating point number
+    ('INTEGER',     r'-?\b\d+\b'),                                      # Integer
+    ('STRING',      r'(?:"(?:\\.|[^"\\])*")|(?:\'(?:\\.|[^\'\\])*\')'), # String literal with escapes
+    ('BOOL',        r'\b(true|false)\b'),                               # Boolean 
+    ('NULL',        r'\bnull\b'),                                       # NULL
+    ('PATH',        r'(\./|/)[a-zA-Z0-9_\-][a-zA-Z0-9_\-./]*'),         # Nix Path datatype
+    ('KEYWORD',     KEYWORD_REGEX),                                     # Keyword
+    ('IDENTIFIER',  IDENTIFIER_REGEX),                                  # Identifiers
+    ('LBRACE',      r'\{'),                                             # Left brace
+    ('RBRACE',      r'\}'),                                             # Right brace
+    ('LPAREN',      r'\('),                                             # Left parenthesis
+    ('RPAREN',      r'\)'),                                             # Right parenthesis
+    ('LSPAREN',     r'\['),                                             # Left parenthesis
+    ('RSPAREN',     r'\]'),                                             # Right parenthesis
+    ('COMMA',       r'\,'),                                             # Comma
+    ('COLON',       r':'),                                              # Colon
+    ('SEMICOLON',   r';'),                                              # Semicolon
+    ('ELLIPSE',      r'\.\.\.'),                                        # ELlipse
+    ('WHITESPACE',  r'\s+'),                                            # Whitespace (ignored)
+    ('COMMENT',     r'#.*'),                                            # Comment (ignored)
 
     # Operators
-    ('ATTR_SELECT',    r'\.'),              # Attribute selection (attrset . attrpath)
-    ('HAS_ATTR',       r'\?'),              # Has attribute (attrset ? attrpath)
-    ('LIST_CONCAT',    r'\+\+'),            # List concatenation (list ++ list)
-    ('MUL',           r'\*'),               # Multiplication (number * number)
-    ('DIV',           r'\/'),               # Division (number / number)
-    ('SUB',           r'-'),                # Subtraction (number - number)
-    ('ADD',           r'\+'),               # Addition (number + number)
-    ('LOGICAL_NOT',   r'!'),                # Logical negation (NOT) (! bool)
-    ('UPDATE',        r'\/\/'),             # Attribute set update (attrset // attrset)
-    ('LT',            r'<'),                # Less than (expr < expr)
-    ('LTE',           r'<='),               # Less than or equal to (expr <= expr)
-    ('GT',            r'>'),                # Greater than (expr > expr)
-    ('GTE',           r'>='),               # Greater than or equal to (expr >= expr)
-    ('EQ_OP',         r'=='),               # Equality (expr == expr)
-    ('NEQ_OP',        r'!='),               # Inequality (expr != expr)
-    ('LOGICAL_AND',   r'&&'),               # Logical conjunction (AND) (bool && bool)
-    ('LOGICAL_OR',    r'\|\|'),             # Logical disjunction (OR) (bool || bool)
-    ('IMPLIES',       r'->'),               # Logical implication (bool -> bool)
-    ('PIPE_LEFT',     r'\|>'),              # Pipe operator (expr |> func)
-    ('PIPE_RIGHT',    r'<\|'),              # Pipe operator (func <| expr)
+    ('ATTR_SELECT',   r'(?<!\d)\s*\.\s*(?!\d)'),        # Attribute selection (attrset . attrpath)
+    ('IMPLIES',       r'->'),                           # Logical implication (bool -> bool)
+    ('HAS_ATTR',      r'\?'),                           # Has attribute (attrset ? attrpath)
+    ('LIST_CONCAT',   r'\+\+'),                         # List concatenation (list ++ list)
+    ('UPDATE',        r'\/\/'),                         # Attribute set update (attrset // attrset)
+    ('PIPE_LEFT',     r'\|>'),                          # Pipe operator (expr |> func)
+    ('PIPE_RIGHT',    r'<\|'),                          # Pipe operator (func <| expr)
+    ('MUL',           r'\*'),                           # Multiplication (number * number)
+    ('DIV',           r'\/'),                           # Division (number / number)
+    ('SUB',           r'-'),                            # Subtraction (number - number)
+    ('ADD',           r'\+'),                           # Addition (number + number)
+    ('LTE',           r'<='),                           # Less than or equal to (expr <= expr)
+    ('GTE',           r'>='),                           # Greater than or equal to (expr >= expr)
+    ('GT',            r'>'),                            # Greater than (expr > expr)
+    ('EQ_OP',         r'=='),                           # Equality (expr == expr)
+    ('LT',            r'<'),                            # Less than (expr < expr)
+    ('NEQ_OP',        r'!='),                           # Inequality (expr != expr)
+    ('LOGICAL_AND',   r'&&'),                           # Logical conjunction (AND) (bool && bool)
+    ('LOGICAL_NOT',   r'!'),                            # Logical negation (NOT) (! bool)
+    ('LOGICAL_OR',    r'\|\|'),                         # Logical disjunction (OR) (bool || bool)
+    ('EQ',            r'='),                            # Equals sign
 ]
 
-def lex(code):
+def lex(code: str) -> TokenStream:
+    """Tokenizes a Nix script
+
+    :param code: Nix script to lex
+    :type code: str
+    :return: returns a stream of tokens
+    :rtype: TokenStream
+    """
     tok_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in TOKEN_MAPS)
     tokens = TokenStream()
     

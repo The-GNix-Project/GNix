@@ -1,12 +1,22 @@
-# from lexer import lex, tokenTypes
-# from grammar import Token, TokenStream, PRIMITIVE_TYPES, array
+""" 
+Contains everything to turn a TokenStream into an Abstract Syntax Tree
+
+dict        _BRACKET_MAP        used to define pairs of brackets
+function    _parse_block        takes a TokenStream and index of first bracket then recursively splits it into more TokenStreams, grouping them by brackets {} [] and ()
+function    parse_brackets      takes a raw TokenStream then recursively splits it into more TokenStreams, grouping them by brackets {} [] and ()
+function    is_nix_array        checks if a given TokenStream is a Nix Array
+function    parse_arguments     Parses arguments of a Nix function
+function    build_assignment    builds/parses Nix assignment (var = val;)
+function    array               parses a Nix array datatype
+function    _parse              Idk what it does yet lol, very in development
+"""
 
 from json import dump
 from os import remove, path
 from typing import Tuple
 
 from .lexer import lex, tokenTypes
-from .grammar import Token, TokenStream, PRIMITIVE_TYPES, array
+from .grammar import Token, TokenStream, PRIMITIVE_TYPES
     
 
 # Mapping opening tokens to their expected closing token.
@@ -16,7 +26,18 @@ _BRACKET_MAP = {
     tokenTypes.left_square_paren:   tokenTypes.right_square_paren,
 }
 
-def _parse_block(tokens: TokenStream, i):
+def _parse_block(tokens: TokenStream, i) -> TokenStream:
+    """takes a TokenStream and index of first bracket then recursively splits it into more TokenStreams, grouping them by brackets {} [] and ()
+
+    :param tokens: TokenStream to group
+    :type tokens: TokenStream
+    :param i: index of opening bracket
+    :type i: int
+    :raises SyntaxError: raises error if index provided has no valid opening bracket
+    :raises SyntaxError: raises error if no closing bracket exists
+    :return: returns the grouped TokenStream
+    :rtype: TokenStream
+    """
     token = tokens[i]
     if token.type not in _BRACKET_MAP:
         raise SyntaxError(f"Expected opening token at index {i}, got {token}")
@@ -43,10 +64,13 @@ def _parse_block(tokens: TokenStream, i):
 
     raise SyntaxError(f"Missing closing token for {open_token}")
 
-def _parse_brackets(tokens: TokenStream):
-    """
-    Parse an entire token stream into a list of blocks.
-    Tokens outside of any block will be added as individual items.
+def parse_brackets(tokens: TokenStream) -> TokenStream:
+    """takes a raw TokenStream then recursively splits it into more TokenStreams, grouping them by brackets {} [] and ()
+
+    :param tokens: Raw TokenStream to parse
+    :type tokens: TokenStream
+    :return: TokenStream grouped by brackets
+    :rtype: TokenStream
     """
     result = TokenStream()
     i = 0
@@ -61,6 +85,13 @@ def _parse_brackets(tokens: TokenStream):
 
 # Array detection
 def is_nix_array(token_list: TokenStream) -> bool:
+    """checks if a given TokenStream is a Nix Array
+
+    :param token_list: TokenStream to check
+    :type token_list: TokenStream
+    :return: True or False
+    :rtype: bool
+    """
     if not token_list:
         return False
     
@@ -80,10 +111,14 @@ def is_nix_array(token_list: TokenStream) -> bool:
     except IndexError:
         return False
 
-def is_attr_set(stream: TokenStream) -> bool: ...
-def is_function(stream: TokenStream) -> bool: ...
-
 def parse_arguments(stream:TokenStream) -> list:
+    """Parses arguments of a function
+
+    :param stream: stream to parse
+    :type stream: TokenStream
+    :return: list of arguments
+    :rtype: list
+    """
     if stream[0].type == tokenTypes.left_brace: stream.pop(0)
     if stream[-1].type == tokenTypes.right_brace: stream.pop(-1)
     arguments = []
@@ -99,6 +134,19 @@ def parse_arguments(stream:TokenStream) -> list:
     return arguments
 
 def build_assignment(i: int, token_stream: TokenStream, token: Token, results: list)-> Tuple[int, Token, list]:
+    """builds/parses Nix assignment (var = val;)
+
+    :param i: index of equals sign
+    :type i: int
+    :param token_stream: current token stream
+    :type token_stream: TokenStream
+    :param token: current token (should be an equals sign)
+    :type token: Token
+    :param results: current list of parsing results
+    :type results: list
+    :return: returns the index, current token and results
+    :rtype: Tuple[int, Token, list]
+    """
     if token.type == tokenTypes.equals: 
         try:
             left = token_stream[i-1]
@@ -117,15 +165,34 @@ def build_assignment(i: int, token_stream: TokenStream, token: Token, results: l
         except IndexError: pass
     return i, results  
 
+def array(token_stream: TokenStream | list) -> list:
+    """parses a Nix array datatype
+
+    :param token_stream: Nix array to build syntax tree from
+    :type token_stream: TokenStream | list
+    :return: returns a list containing elements in the array    
+    :rtype: list
+    """
+    print(token_stream)
+    if isinstance(token_stream, list):
+        return token_stream
+    if token_stream[0].type == "LSPAREN":
+        token_stream.pop(0)
+    if token_stream[-1].type == "RSPAREN":
+        token_stream.pop(-1)
+    array = []
+    for token in token_stream:
+        array.append({token.type: token.content})
+        
+    return array
+
 # Recursive parser
 def _parse(token_stream: TokenStream) -> dict:
+    """Idk what it does yet lol, very in development"""
     # Check if current level is an array FIRST
     if is_nix_array(token_stream):
         return {"ARRAY": array(_parse(token_stream[1:-1]))}
-        
-    if is_attr_set(token_stream): pass
-    if is_function(token_stream): pass
-        
+                
     # Then process nested streams
     results = []
     i = 0

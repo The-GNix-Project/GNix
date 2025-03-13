@@ -1,6 +1,6 @@
 # Development Tools
 .vscode/*
-*.nix
+add_script_desc.py
 
 # Ignore virtual environment folder
 kivy-env/

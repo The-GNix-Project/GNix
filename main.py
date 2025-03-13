@@ -1,7 +1,7 @@
 import os, json
 
 from src import lex
-from src.parser.parsing import _parse_brackets, _parse
+from src.parser.parsing import parse_brackets, _parse
 
 print(lex("""
 { config, pkgs, lib, inputs, ... }:

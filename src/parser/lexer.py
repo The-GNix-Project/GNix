@@ -1,7 +1,18 @@
+""" 
+Script that contains all logic to take a Nix script and turn it into a stream of tokens
+
+string      KEWORD_REGEX        Regex to match for a Nix keyword
+string      IDENTIFIER_REGEX    Regex to match for a Nix identifier
+class       _TokenTypes         Private class used for token type annotation
+_TokenTypes tokenTypes          Variable used to perform logic etc with a token type. E.g. if token.type == tokenTypes.string:
+list        TOKEN_MAPS          List of regex to match all different types of tokens
+function    lex                 Tokenizes a nix script
+"""
+
 import re 
 
-# from grammar import Token, TokenStream, NIX_KEYWORDS, OPERATORS
-from .grammar import Token, TokenStream, NIX_KEYWORDS, OPERATORS
+# from grammar import Token, TokenStream, NIX_KEYWORDS
+from .grammar import Token, TokenStream, NIX_KEYWORDS
 
 KEYWORD_REGEX = rf'\b({'|'.join(NIX_KEYWORDS)})\b'
 IDENTIFIER_REGEX = rf"\b(?!(?:{'|'.join(NIX_KEYWORDS)})\b)[A-Za-z_][A-Za-z0-9_'-]*\b"
@@ -9,6 +20,7 @@ IDENTIFIER_REGEX = rf"\b(?!(?:{'|'.join(NIX_KEYWORDS)})\b)[A-Za-z_][A-Za-z0-9_'-
 TOKENS = ['INTEGER','STRING','BOOL','NULL','FLOAT','PATH','KEYWORD','IDENTIFIER','LBRACE','RBRACE','LPAREN','RPAREN','LSPAREN','RSPAREN','COMMA','EQ','COLON','SEMICOLON','ELLIPSE','WHITESPACE','COMMENT','ATTR_SELECT','HAS_ATTR','LIST_CONCAT','MUL','DIV','SUB','ADD','LOGICAL_NOT','UPDATE','LT','LTE','GT','GTE','EQ_OP','NEQ_OP','LOGICAL_AND','LOGICAL_OR','IMPLIES','PIPE_LEFT','PIPE_RIGHT']
 
 class _TokenTypes:
+    """Private class used for token type annotation"""
     integer = "INTEGER"
     string = "STRING"
     bool = "BOOL"

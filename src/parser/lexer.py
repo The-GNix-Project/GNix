@@ -1,7 +1,7 @@
 import re 
 
-from grammar import Token, TokenStream, NIX_KEYWORDS, OPERATORS
-# from .grammar import Token, TokenStream
+# from grammar import Token, TokenStream, NIX_KEYWORDS, OPERATORS
+from .grammar import Token, TokenStream, NIX_KEYWORDS, OPERATORS
 
 KEYWORD_REGEX = rf'\b({'|'.join(NIX_KEYWORDS)})\b'
 IDENTIFIER_REGEX = rf"\b(?!(?:{'|'.join(NIX_KEYWORDS)})\b)[A-Za-z_][A-Za-z0-9_'-]*\b"

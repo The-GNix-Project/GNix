@@ -1,12 +1,12 @@
-from lexer import lex, tokenTypes
-from grammar import Token, TokenStream, PRIMITIVE_TYPES, array
+# from lexer import lex, tokenTypes
+# from grammar import Token, TokenStream, PRIMITIVE_TYPES, array
 
 from json import dump
 from os import remove, path
 from typing import Tuple
 
-# from .lexer import lex
-# from .grammar import Array, Token, TokenStream
+from .lexer import lex, tokenTypes
+from .grammar import Token, TokenStream, PRIMITIVE_TYPES, array
     
 
 # Mapping opening tokens to their expected closing token.
@@ -166,38 +166,3 @@ def _parse(token_stream: TokenStream) -> dict:
     
     return results
     
-if __name__ == "__main__":
-    script = """ 
-    { config ? "myVal", pkgs, lib, inputs, instring, ... }:
-    {
-    experimental-features = [ "nix-command" "flakes" ["test" 2] {a=2;b=3}];
-
-    imports =
-        [ # Include the results of the hardware scan.
-        ./hardware-configuration.nix
-        # Computer specific settings
-        # ./mavic.nix
-        ];
-        
-    myVar = 4;
-    }
-
-    { config ? "myVal", pkgs, lib, inputs, instring, ... }:
-    {
-    experimental-features = [ "nix-command" "flakes" ["test" 2] {a=2;b=3}];
-
-    imports =
-        [ # Include the results of the hardware scan.
-        ./hardware-configuration.nix
-        # Computer specific settings
-        # ./mavic.nix
-        ];
-        
-    myVar = 4;
-    }
-    """
-    brackets = _parse_brackets(lex(script))
-    parsed = _parse(brackets)
-    if path.isfile("AST.json"): remove("AST.json")
-    with open("AST.json", "x") as file:
-        dump(parsed, file)

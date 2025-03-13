@@ -1,45 +1,57 @@
 import re 
 
-from grammar import Token, TokenStream
+from grammar import Token, TokenStream, NIX_KEYWORDS, OPERATORS
 # from .grammar import Token, TokenStream
 
-NIX_KEYWORDS = ["assert",
-                "else",
-                "if",
-                "in",
-                "inherit",
-                "let",
-                "or",
-                "rec",
-                "then",
-                "with"
-]
 KEYWORD_REGEX = rf'\b({'|'.join(NIX_KEYWORDS)})\b'
-IDENTIFIER_REGEX = rf"(?!{'|'.join(NIX_KEYWORDS)})" + r"[A-Za-z_][A-Za-z0-9_'-]*"
+IDENTIFIER_REGEX = rf"\b(?!(?:{'|'.join(NIX_KEYWORDS)})\b)[A-Za-z_][A-Za-z0-9_'-]*\b"
 
-OPERATORS = ['ATTR_SELECT', 
-        'HAS_ATTR',    
-        'LIST_CONCAT', 
-        'MUL',         
-        'DIV',         
-        'SUB',         
-        'ADD',         
-        'LOGICAL_NOT', 
-        'UPDATE',      
-        'LT',          
-        'LTE',         
-        'GT',          
-        'GTE',         
-        'EQ_OP',       
-        'NEQ_OP',      
-        'LOGICAL_AND', 
-        'LOGICAL_OR',  
-        'IMPLIES',     
-        'PIPE_LEFT',   
-        'PIPE_RIGHT'
-] 
-          
-TOKENS = [
+TOKENS = ['INTEGER','STRING','BOOL','NULL','FLOAT','PATH','KEYWORD','IDENTIFIER','LBRACE','RBRACE','LPAREN','RPAREN','LSPAREN','RSPAREN','COMMA','EQ','COLON','SEMICOLON','ELLIPSE','WHITESPACE','COMMENT','ATTR_SELECT','HAS_ATTR','LIST_CONCAT','MUL','DIV','SUB','ADD','LOGICAL_NOT','UPDATE','LT','LTE','GT','GTE','EQ_OP','NEQ_OP','LOGICAL_AND','LOGICAL_OR','IMPLIES','PIPE_LEFT','PIPE_RIGHT']
+
+class _TokenTypes:
+    integer = "INTEGER"
+    string = "STRING"
+    bool = "BOOL"
+    null = "NULL"
+    float = "FLOAT"
+    path = "PATH"
+    keyword = "KEYWORD"
+    identifier = "IDENTIFIER"
+    left_brace, right_brace = "LBRACE", "RBRACE"
+    left_paren, right_paren = "LPAREN", "RPAREN"
+    left_square_paren, right_square_paren = "LSPAREN", "RSPAREN"
+    comma = "COMMA"
+    equals = "EQ"
+    colon = "COLON"
+    semicolon = "SEMICOLON"
+    ellipse = "ELLIPSE"
+    whitespace = "WHITESPACE"
+    comment = "COMMENT"
+    attribute_select = "ATTR_SELECT"
+    has_attribute = "HAS_ATTR"
+    list_concatenation = "LIST_CONCAT"
+    multiply = "MUL"
+    divide = "DIV"
+    subtract = "SUB"
+    add = "ADD"
+    logical_not = "LOGICAL_NOT"
+    update = "UPDATE"
+    less_than = "LT"
+    less_than_equals = "LTE"
+    greater_than = "GT"
+    greater_than_equals = "GTE"
+    logical_equals = "EQ_OP"
+    not_equal = "NEQ_OP"
+    logical_and = "LOGICAL_AND"
+    logical_or = "LOGICAL_OR"
+    implies = "IMPLIES"
+    left_pipe = "PIPE_LEFT"
+    right_pipe = "PIPE_RIGHT"
+    stream = "STREAM"
+
+tokenTypes = _TokenTypes()
+
+TOKEN_MAPS = [
     ('INTEGER',     r'-?\b\d+\b'),                          # Integer
     ('STRING',      r'"(?:\\.|[^"\\])*"'),                  # String literal with escapes
     ('BOOL',        r'\b(true|false)\b'),                   # Boolean 
@@ -84,17 +96,18 @@ TOKENS = [
     ('PIPE_LEFT',     r'\|>'),              # Pipe operator (expr |> func)
     ('PIPE_RIGHT',    r'<\|'),              # Pipe operator (func <| expr)
 ]
-    
+
 def lex(code):
-    tok_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in TOKENS)
+    tok_regex = '|'.join(f'(?P<{name}>{pattern})' for name, pattern in TOKEN_MAPS)
     tokens = TokenStream()
     
     for mo in re.finditer(tok_regex, code):
         kind = mo.lastgroup
         value = mo.group()
-        if kind == 'WHITESPACE' or kind == 'COMMENT':
+        if kind == tokenTypes.whitespace or kind == tokenTypes.comment:
             continue
         tokens.append(Token(kind, value))
+        print(tokens[-1])
     
     return tokens
     

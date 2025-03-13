@@ -1,5 +1,9 @@
-from lexer import lex
-from grammar import Array, Token, TokenStream
+from lexer import lex, tokenTypes
+from grammar import Token, TokenStream, PRIMITIVE_TYPES, array
+
+from json import dump
+from os import remove, path
+from typing import Tuple
 
 # from .lexer import lex
 # from .grammar import Array, Token, TokenStream
@@ -7,9 +11,9 @@ from grammar import Array, Token, TokenStream
 
 # Mapping opening tokens to their expected closing token.
 _BRACKET_MAP = {
-    "LBRACE": "RBRACE",
-    "LPAREN": "RPAREN",
-    "LSPAREN": "RSPAREN",
+    tokenTypes.left_brace:          tokenTypes.right_brace,
+    tokenTypes.left_paren:          tokenTypes.right_paren,
+    tokenTypes.left_square_paren:   tokenTypes.right_square_paren,
 }
 
 def _parse_block(tokens: TokenStream, i):
@@ -60,6 +64,9 @@ def is_nix_array(token_list: TokenStream) -> bool:
     if not token_list:
         return False
     
+    if isinstance(token_list, Token):
+        return False
+    
     try:
         first = token_list[0]
         last = token_list[-1]
@@ -68,32 +75,102 @@ def is_nix_array(token_list: TokenStream) -> bool:
         if not (isinstance(first, Token) and isinstance(last, Token)):
             return False
             
-        return first.type == "LSPAREN" and last.type == "RSPAREN"
+        return first.type == tokenTypes.left_square_paren and last.type  == tokenTypes.right_square_paren
         
     except IndexError:
         return False
 
+def is_attr_set(stream: TokenStream) -> bool: ...
+def is_function(stream: TokenStream) -> bool: ...
+
+def parse_arguments(stream:TokenStream) -> list:
+    if stream[0].type == tokenTypes.left_brace: stream.pop(0)
+    if stream[-1].type == tokenTypes.right_brace: stream.pop(-1)
+    arguments = []
+    for i, token in enumerate(stream):
+        if token.type == tokenTypes.identifier:
+            argument = {}
+            try:
+                if stream[i+1].type == tokenTypes.has_attribute:
+                    argument["DEFAULT"] = _parse(TokenStream([stream[i+2]]))[0]
+            except IndexError: pass
+            argument["ARGUMENT"] = token.content
+            arguments.append(argument)
+    return arguments
+
+def build_assignment(i: int, token_stream: TokenStream, token: Token, results: list)-> Tuple[int, Token, list]:
+    if token.type == tokenTypes.equals: 
+        try:
+            left = token_stream[i-1]
+            right = token_stream[i+1]
+            if is_nix_array(right):
+                right = Token("ARRAY", _parse(right))
+            if (left.type == tokenTypes.identifier and
+                token_stream[i+2].type == tokenTypes.semicolon and
+                token_stream[i-2].type != tokenTypes.attribute_select):
+                if right.type in PRIMITIVE_TYPES:
+                    results.append({"ASSIGNMENT":{"VARIABLE":left.content, "VALUE":{right.type:right.content}}})
+                    i += 2
+                if right.type == "ARRAY":
+                    results.append({"ASSIGNMENT":{"VARIABLE":left.content, "VALUE":{right.type:right.content["ARRAY"]}}})
+                    i += 2
+        except IndexError: pass
+    return i, results  
+
 # Recursive parser
-def _parse(token_list: TokenStream) -> dict:
+def _parse(token_stream: TokenStream) -> dict:
     # Check if current level is an array FIRST
-    if is_nix_array(token_list):
-        return {"ARRAY": Array(token_list)}
+    if is_nix_array(token_stream):
+        return {"ARRAY": array(_parse(token_stream[1:-1]))}
+        
+    if is_attr_set(token_stream): pass
+    if is_function(token_stream): pass
         
     # Then process nested streams
     results = []
-    for token in token_list:
+    i = 0
+    while i < len(token_stream):
+        token = token_stream[i]
+        try:
+            if (token_stream[i-1].type==tokenTypes.stream and
+                token.type == tokenTypes.colon and
+                token_stream[i+1].type==tokenTypes.stream):
+                return {"FUNCTION":{"ARGUMENTS":parse_arguments(token_stream[i-1]), "CONTENTS":_parse(token_stream[i+1])}}
+        except IndexError: pass
+        
         if isinstance(token, TokenStream):
-            print("Recursing into nested stream")
             results.append(_parse(token))
+        if token.type == tokenTypes.equals: 
+            try:
+                left = token_stream[i-1]
+                right = token_stream[i+1]
+                if is_nix_array(right):
+                    right = Token("ARRAY", _parse(right))
+                if (left.type == tokenTypes.identifier and
+                    token_stream[i+2].type == tokenTypes.semicolon and
+                    token_stream[i-2].type != tokenTypes.attribute_select):
+                    if right.type in PRIMITIVE_TYPES:
+                        results.append({"ASSIGNMENT":{"VARIABLE":left.content, "VALUE":{right.type:right.content}}})
+                        i += 2
+                        try: token = token_stream[i]
+                        except IndexError: break
+                    if right.type == "ARRAY":
+                        results.append({"ASSIGNMENT":{"VARIABLE":left.content, "VALUE":{right.type:right.content["ARRAY"]}}})
+                        i += 2
+                        try: token = token_stream[i]
+                        except IndexError: break
+            except IndexError: pass
+        if token.type in PRIMITIVE_TYPES: 
+            results.append({token.type:token.content})
+        i += 1
     
-    return {"BLOCK": results}
+    return results
     
 if __name__ == "__main__":
     script = """ 
-    { config, pkgs, lib, inputs, ... }:
-
+    { config ? "myVal", pkgs, lib, inputs, instring, ... }:
     {
-    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+    experimental-features = [ "nix-command" "flakes" ["test" 2] {a=2;b=3}];
 
     imports =
         [ # Include the results of the hardware scan.
@@ -102,9 +179,25 @@ if __name__ == "__main__":
         # ./mavic.nix
         ];
         
-    attrs = {x=1;b=3;c={n=2}d=x:x+1};
+    myVar = 4;
     }
 
+    { config ? "myVal", pkgs, lib, inputs, instring, ... }:
+    {
+    experimental-features = [ "nix-command" "flakes" ["test" 2] {a=2;b=3}];
+
+    imports =
+        [ # Include the results of the hardware scan.
+        ./hardware-configuration.nix
+        # Computer specific settings
+        # ./mavic.nix
+        ];
+        
+    myVar = 4;
+    }
     """
     brackets = _parse_brackets(lex(script))
-    print(_parse(brackets))
+    parsed = _parse(brackets)
+    if path.isfile("AST.json"): remove("AST.json")
+    with open("AST.json", "x") as file:
+        dump(parsed, file)

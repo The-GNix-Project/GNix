@@ -1,4 +1,5 @@
 from src.parser.lexer import lex
+from src.parser.parsing import parse_brackets
 from src.parser.grammar import Token, TokenStream
 
 def test_lexer():
@@ -351,3 +352,31 @@ def test_lexer():
     assert lex("->") == TokenStream(stream=[Token(type="IMPLIES", content="->")])
     assert lex("|>") == TokenStream(stream=[Token(type="PIPE_LEFT", content="|>")])
     assert lex("<|") == TokenStream(stream=[Token(type="PIPE_RIGHT", content="<|")])
+
+def test_parse_brackets():
+    lexed = lex("{{[]}[]}")
+    assert parse_brackets(lex("{{[]}[]}")) == TokenStream(stream=[TokenStream(stream=[Token(type='LBRACE', content='{'),
+                                                                                    TokenStream(stream=[Token(type='LBRACE', content='{'), 
+                                                                                                        TokenStream(stream=[Token(type='LSPAREN', content='['),
+                                                                                                                            Token(type='RSPAREN', content=']')], type='STREAM'
+                                                                                                                    ),
+                                                                                                        Token(type='RBRACE', content='}')], type='STREAM'
+                                                                                                ),
+                                                                                    TokenStream(stream=[Token(type='LSPAREN', content='['), 
+                                                                                                        Token(type='RSPAREN', content=']')], type='STREAM'
+                                                                                                ), 
+                                                                                    Token(type='RBRACE', content='}')], type='STREAM'
+                                                                                )
+                                                                ], type='STREAM')
+    assert parse_brackets(lex("{'string'[123]}")) == TokenStream(stream=[TokenStream(stream=[Token(type='LBRACE', content='{'), 
+                                                                      Token(type='STRING', content="'string'"),
+                                                                      TokenStream(stream=[Token(type='LSPAREN', content='['),
+                                                                                          Token(type='INTEGER', content='123'),
+                                                                                          Token(type='RSPAREN', content=']')], type='STREAM'
+                                                                                  ),
+                                                                      Token(type='RBRACE', content='}')], type='STREAM')], type='STREAM')
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            

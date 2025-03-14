@@ -1,0 +1,12 @@
+[package]
+name = "rust_parser"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+# This tells Cargo to produce a dynamic library suitable for Python
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.24.0", features = ["extension-module"] }
+nixel = { version = "5.2.0"}

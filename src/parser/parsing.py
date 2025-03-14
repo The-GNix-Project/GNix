@@ -186,6 +186,8 @@ def array(token_stream: TokenStream | list) -> list:
         
     return array
 
+
+
 # Recursive parser
 def _parse(token_stream: TokenStream) -> dict:
     """Idk what it does yet lol, very in development"""
@@ -198,13 +200,14 @@ def _parse(token_stream: TokenStream) -> dict:
     i = 0
     while i < len(token_stream):
         token = token_stream[i]
+        
         try:
             if (token_stream[i-1].type==tokenTypes.stream and
                 token.type == tokenTypes.colon and
                 token_stream[i+1].type==tokenTypes.stream):
                 return {"FUNCTION":{"ARGUMENTS":parse_arguments(token_stream[i-1]), "CONTENTS":_parse(token_stream[i+1])}}
         except IndexError: pass
-        
+
         if isinstance(token, TokenStream):
             results.append(_parse(token))
         if token.type == tokenTypes.equals: 
@@ -232,4 +235,3 @@ def _parse(token_stream: TokenStream) -> dict:
         i += 1
     
     return results
-    

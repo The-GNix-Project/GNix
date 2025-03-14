@@ -66,7 +66,7 @@ tokenTypes = _TokenTypes()
 TOKEN_MAPS = [
     ('FLOAT',       r'-?\b\d+\.\d+([eE][+-]?\d+)?\b|-?\b\d+[eE][+-]?\d+\b'),# floating point number
     ('INTEGER',     r'-?\b\d+\b'),                                      # Integer
-    ('STRING',      r'(?:"(?:\\.|[^"\\])*")|(?:\'(?:\\.|[^\'\\])*\')'), # String literal with escapes
+    ('STRING',      r'(?:"(?:\\.|[^"\\])*")|(?:\'\'(?:\\.|[^\'\'\\])*\'\')'), # String literal with escapes
     ('BOOL',        r'\b(true|false)\b'),                               # Boolean 
     ('NULL',        r'\bnull\b'),                                       # NULL
     ('PATH',        r'(\./|/)[a-zA-Z0-9_\-][a-zA-Z0-9_\-./]*'),         # Nix Path datatype
@@ -84,8 +84,6 @@ TOKEN_MAPS = [
     ('ELLIPSE',      r'\.\.\.'),                                        # ELlipse
     ('WHITESPACE',  r'\s+'),                                            # Whitespace (ignored)
     ('COMMENT',     r'#.*'),                                            # Comment (ignored)
-
-    # Operators
     ('ATTR_SELECT',   r'(?<!\d)\s*\.\s*(?!\d)'),        # Attribute selection (attrset . attrpath)
     ('IMPLIES',       r'->'),                           # Logical implication (bool -> bool)
     ('HAS_ATTR',      r'\?'),                           # Has attribute (attrset ? attrpath)

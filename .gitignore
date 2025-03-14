@@ -2,6 +2,9 @@
 .vscode/*
 add_script_desc.py
 
+# Build Target
+/src/rust_parser/target
+
 # Ignore virtual environment folder
 kivy-env/
 

@@ -21,7 +21,7 @@ def test_lexer():
                                                                         Token(type="RSPAREN", content="]"),
                                                                         Token(type='SEMICOLON', content=';')], type='STREAM')
     # Check strings could be defined with " or '
-    assert lex("'string'") == TokenStream(stream=[Token(type='STRING', content="'string'")])
+    assert lex("''string''") == TokenStream(stream=[Token(type='STRING', content="''string''")])
     assert lex('"string"') == TokenStream(stream=[Token(type='STRING', content='"string"')])
     assert lex("3124") == TokenStream(stream=[Token(type="INTEGER", content="3124")])
     assert lex("31.24") == TokenStream(stream=[Token(type="FLOAT", content="31.24")])
@@ -281,7 +281,7 @@ def test_lexer():
     assert lex("3124") == TokenStream(stream=[Token(type="INTEGER", content="3124")])
     
     # STRING (both single and double quoted)
-    assert lex("'hello world'") == TokenStream(stream=[Token(type="STRING", content="'hello world'")])
+    assert lex("''hello world''") == TokenStream(stream=[Token(type="STRING", content="''hello world''")])
     assert lex('"hello world"') == TokenStream(stream=[Token(type="STRING", content='"hello world"')])
     
     # BOOL
@@ -368,8 +368,8 @@ def test_parse_brackets():
                                                                                     Token(type='RBRACE', content='}')], type='STREAM'
                                                                                 )
                                                                 ], type='STREAM')
-    assert parse_brackets(lex("{'string'[123]}")) == TokenStream(stream=[TokenStream(stream=[Token(type='LBRACE', content='{'), 
-                                                                      Token(type='STRING', content="'string'"),
+    assert parse_brackets(lex("{''string''[123]}")) == TokenStream(stream=[TokenStream(stream=[Token(type='LBRACE', content='{'), 
+                                                                      Token(type='STRING', content="''string''"),
                                                                       TokenStream(stream=[Token(type='LSPAREN', content='['),
                                                                                           Token(type='INTEGER', content='123'),
                                                                                           Token(type='RSPAREN', content=']')], type='STREAM'

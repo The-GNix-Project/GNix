@@ -1,9 +1,10 @@
 # Development Tools
 .vscode/*
+shell.nix
 add_script_desc.py
 
 # Build Target
-/src/rust_parser/target
+/nix_parser/target
 
 # Ignore virtual environment folder
 kivy-env/
@@ -12,3 +13,4 @@ kivy-env/
 __pycache__/
 *.pyc
 .venv/*
+venv/

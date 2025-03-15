@@ -4,5 +4,4 @@ import os
 
 import kivy
 
-from .parser import lex
 from .app import GNix

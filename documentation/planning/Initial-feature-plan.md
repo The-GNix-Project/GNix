@@ -1,0 +1,5 @@
+|                   | Must Have | Should Have | Could Have | Won't have |
+| --------          | -------   | -------     | -------    | -------    |
+| **Utility**       | initialisation of git tracked, flaked nixos config with folder structure/script templates<br><br>initialisation of home manager<br><br>add/remove packages from home manager/nixos config | intergrate with nixpkgs to search for packages<br><br>create/transpose configurations in a style that is readable by humans (no 1000 line .nix files etc.)  | preset configurations for common packages (Gnome, X11/Wayland, Nvidia drivers, etc.) | anything not listed prior
+| **Effectiveness** | Time consuming backend features written with Rust bindings or bash <br><br> generated nix modules must make sense to a human reading them <br><br>  | move existing nixos configs into the newly initialised nixos config area | | anything not listed prior
+| **Learnability**  | docs with text tutorials, quickstart and technical details | demo video | explaination video | anything not listed prior

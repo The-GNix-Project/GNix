@@ -2,6 +2,7 @@
 .vscode/*
 shell.nix
 add_script_desc.py
+config_test/*
 
 # Build Target
 /nix_parser/target

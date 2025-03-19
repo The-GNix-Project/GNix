@@ -7,7 +7,7 @@ import yaml
 from nix_parser import parse_nix
 
 def nixos_config_init(path: str):
-    BASH_PATH = "/home/archie/Documents/GNix/src/nixtools/bash/nix_config_init.sh"
+    BASH_PATH = "src/nix_manager/bash/nix_config_init.sh"
     try:
         run([BASH_PATH, path])
     except CalledProcessError as e:
@@ -19,7 +19,7 @@ TEMPLATES_PATH = "templates"
 class nixFile(dict):
     def __init__(self, script, locate_modules=False):
         self.script = script
-        #parse script
+        self.parsed = parse_nix(script)
 
 class nixosConfigDirectory:
     flakes: bool = False

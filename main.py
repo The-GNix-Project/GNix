@@ -1,7 +1,6 @@
-from src.nix_manager.nixos import nixosConfigDirectory
-from nix_parser import nix
+from src.nix_manager.nixos import parse_nix, find_key_pair
 
-config = nixosConfigDirectory()
-print(config.folder_tree)
-config.folder_structure("default-with-users")
-print(config.folder_tree)
+with open("test.nix") as f:
+    parsed = parse_nix(f.read())
+
+print(find_key_pair(parsed, "imports"))

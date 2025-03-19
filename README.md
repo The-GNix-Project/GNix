@@ -25,8 +25,6 @@ The first stage of development is to get basic Nixos management functionality wo
  [ ] - common Nix options management, Gnome, Plasma, Nvidia drivers etc.
 ```
 
-Notice how there has been no mention of a UI, the plan is to get the backend of the application semi-functional before even thinking about designing a user interface. This is so the front-end is designed to be cohesive.
-
 ## Initial Backend Feature Plan
 
 |                   | Must Have | Should Have | Could Have | Won't have |

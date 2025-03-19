@@ -1,3 +1,7 @@
-from src.nixtools.nixos import nixos_config_init
+from src.nix_manager.nixos import nixosConfigDirectory
+from nix_parser import nix
 
-nixos_config_init("/home/archie/Documents/GNix/config_test")
+config = nixosConfigDirectory()
+print(config.folder_tree)
+config.folder_structure("default-with-users")
+print(config.folder_tree)

@@ -1,0 +1,15 @@
+name: Default
+desc: Default folder structure, basic host and module separation
+root:
+  # flake.nix
+  # flake.lock
+  hosts:
+    host1:
+      # configuration.nix
+      # hardware-configuration.nix
+    host2:
+      # configuration.nix
+      # hardware-configuration.nix
+  modules:
+    mymodule:
+      # module.nix

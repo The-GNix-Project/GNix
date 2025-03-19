@@ -1,8 +1,17 @@
 # from nix_parser import parse
 from typing import List
-
+from subprocess import run, CalledProcessError
 import os
 import yaml
+
+from nix_parser import parse_nix
+
+def nixos_config_init(path: str):
+    BASH_PATH = "/home/archie/Documents/GNix/src/nixtools/bash/nix_config_init.sh"
+    try:
+        run([BASH_PATH, path])
+    except CalledProcessError as e:
+        print("Script failed with error ", e)
 
 FOLDER_TEMPLATES_PATH = "src/nix_manager/nixos_folder_templates"
 TEMPLATES_PATH = "templates"

@@ -1,0 +1,20 @@
+name: Default With Users
+desc: Default folder structure, with separate folders to manage users
+root:
+  # flake.nix
+  # flake.lock
+  hosts:
+    host1:
+      # configuration.nix
+      # hardware-configuration.nix
+    host2:
+      # configuration.nix
+      # hardware-configuration.nix
+  modules:
+    mymodule:
+      # module.nix
+  users:
+    user1:
+      # default.nix
+    user2:
+      # default.nix

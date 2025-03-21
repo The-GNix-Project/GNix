@@ -4,7 +4,7 @@ from subprocess import run, CalledProcessError
 import os
 import yaml
 
-from nix_parser import parse_nix
+from nix_parser import parse_nix, find_key_pair
 
 def nixos_config_init(path: str):
     BASH_PATH = "src/nix_manager/bash/nix_config_init.sh"

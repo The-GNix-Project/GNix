@@ -11,3 +11,7 @@ crate-type = ["cdylib"]
 pyo3 = { version = "0.24.0", features = ["extension-module"] }
 nixel = "5.2.0"
 serde_json = "1.0"
+
+[package.metadata.maturin]
+name = "nix_parser"
+module-name = "nix_parser.nix_parser"

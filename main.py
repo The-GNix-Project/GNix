@@ -1,3 +1,3 @@
-from nix_parser import Position, Span
+from nix_parser import Addition, Operator
 
-print(isinstance(Span(Position(1, 2), Position(1, 3)), Span))
+print(isinstance(Addition(), Operator))

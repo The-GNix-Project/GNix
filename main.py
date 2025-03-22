@@ -1,5 +1,3 @@
-from nix_parser import parse_nix, find_key_pair
-import json
+from nix_parser import Position, Span
 
-parsed = parse_nix('"hello world"')
-print(parsed)
+print(isinstance(Span(Position(1, 2), Position(1, 3)), Span))

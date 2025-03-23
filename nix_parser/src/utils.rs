@@ -1,8 +1,260 @@
+use crate::parser::grammar::*;
+
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 use pyo3::Bound;
 
 use serde_json::Value;
+
+pub fn build_py(py: Python, value: &serde_json::Value) -> PyResult<PyObject> {
+    match value {
+        Value::Null => Ok(py.None()),
+        Value::Bool(b) => Ok(b.into_py(py)),
+        Value::Number(n) => {
+            if let Some(i) = n.as_i64() {
+                Ok(i.into_py(py))
+            } else if let Some(f) = n.as_f64() {
+                Ok(f.into_py(py))
+            } else {
+                Ok(py.None())
+            }
+        }
+        Value::String(s) => Ok(s.into_py(py)),
+        Value::Array(arr) => {
+            let py_list = PyList::empty_bound(py);
+            for item in arr {
+                py_list.append(build_py(py, item)?)?;
+            }
+            Ok(py_list.into_py(py))
+        }
+        Value::Object(obj) => {
+            if let Some(expression) = obj.get("expression") {
+                return build_py(py, expression);
+            }
+
+            let node_type = obj.get("type").and_then(Value::as_str).unwrap_or("");
+        
+            match node_type {
+                "Position" => Ok(Position::new(
+                    obj.get("line").and_then(Value::as_i64).unwrap_or(0),
+                    obj.get("column").and_then(Value::as_i64).unwrap_or(0),
+                ).into_py(py)),
+                
+                "Span" => Ok(Span::new(
+                    build_py(py, obj.get("start").unwrap_or(&Value::Null))?.extract(py)?,
+                    build_py(py, obj.get("end").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+                
+                "Identifier" => Ok(Identifier::new(
+                    obj.get("id").and_then(Value::as_str).unwrap_or_default().to_string(),
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "Error" => Ok(Error::new(
+                    obj.get("message").and_then(Value::as_str).unwrap_or_default().to_string(),            
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "Integer" => Ok(Integer::new(
+                    obj.get("value").and_then(Value::as_str).unwrap_or_default().to_string(),
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "Float" => Ok(Float::new(
+                    obj.get("value").and_then(Value::as_str).unwrap_or_default().to_string(),
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "Function" => Ok(Function::new(
+                    build_py(py, obj.get("head").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("body").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "Addition" => Ok(Addition::new().into_py(py)),
+                "Concatenation" => Ok(Concatenation::new().into_py(py)),
+                "EqualTo" => Ok(EqualTo::new().into_py(py)),
+                "GreaterThan" => Ok(GreaterThan::new().into_py(py)),
+                "GreaterThanOrEqualTo" => Ok(GreaterThanOrEqualTo::new().into_py(py)),
+                "Division" => Ok(Division::new().into_py(py)),
+                "Implication" => Ok(Implication::new().into_py(py)),
+                "LessThan" => Ok(LessThan::new().into_py(py)),
+                "LessThanOrEqualTo" => Ok(LessThanOrEqualTo::new().into_py(py)),
+                "LogicalAnd" => Ok(LogicalAnd::new().into_py(py)),
+                "LogicalOr" => Ok(LogicalOr::new().into_py(py)),
+                "Multiplication" => Ok(Multiplication::new().into_py(py)),
+                "NotEqualTo" => Ok(NotEqualTo::new().into_py(py)),
+                "Subtraction" => Ok(Subtraction::new().into_py(py)),
+                "Update" => Ok(Update::new().into_py(py)),
+                "Not" => Ok(Not::new().into_py(py)),
+                "Negate" => Ok(Negate::new().into_py(py)),
+
+                "List" => Ok(List::new(
+                    obj.get("elements").and_then(Value::as_array).unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| build_py(py, v))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "BinaryOperation" => Ok(BinaryOperation::new(
+                    build_py(py, obj.get("left").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("operator").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("right").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "FunctionHeadDestructuredArgument" => Ok(FunctionHeadDestructuredArgument::new(
+                    obj.get("identifier").and_then(Value::as_str).unwrap_or_default().to_string(),
+                    obj.get("default").map(|v| build_py(py, v)).transpose()?,
+                ).into_py(py)),
+
+                "FunctionHeadDestructured" => Ok(FunctionHeadDestructured::new(
+                    obj.get("ellipsis").and_then(Value::as_bool).unwrap_or(false),
+                    build_py(py, obj.get("identifier").unwrap_or(&Value::Null))?.extract(py)?,
+                    build_py(py, obj.get("arguments").unwrap_or(&Value::Null))?.extract(py)?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "FunctionHeadSimple" => Ok(FunctionHeadSimple::new(
+                    build_py(py, obj.get("identifier").unwrap_or(&Value::Null))?.extract(py)?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "FunctionApplication" => Ok(FunctionApplication::new(
+                    build_py(py, obj.get("function").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("arguments").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "PartInterpolation" => Ok(PartInterpolation::new(
+                    build_py(py, obj.get("expression").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "PartRaw" => Ok(PartRaw::new(
+                    obj.get("content").and_then(Value::as_str).unwrap_or_default().to_string(),
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "Assert" => Ok(Assert::new(
+                    build_py(py, obj.get("expression").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("target").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "HasAttribute" => Ok(HasAttribute::new(
+                    build_py(py, obj.get("expression").unwrap_or(&Value::Null))?,
+                    obj.get("attribute_path").and_then(Value::as_array).unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| build_py(py, v))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "IndentedString" => Ok(IndentedString::new(
+                    obj.get("parts").and_then(Value::as_array).unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| build_py(py, v))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "IfThenElse" => Ok(IfThenElse::new(
+                    build_py(py, obj.get("predicate").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("then").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("else_").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "LetIn" => Ok(LetIn::new(
+                    obj.get("bindings").and_then(Value::as_array).unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| build_py(py, v))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    build_py(py, obj.get("target").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "Map" => Ok(Map::new(
+                    obj.get("recursive").and_then(Value::as_bool).unwrap_or(false),
+                    obj.get("bindings").and_then(Value::as_array).unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| build_py(py, v))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "Path" => Ok(Path::new(
+                    obj.get("parts").and_then(Value::as_array).unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| build_py(py, v))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "Uri" => Ok(Uri::new(
+                    obj.get("uri").and_then(Value::as_str).unwrap_or_default().to_string(),
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "PropertyAccess" => Ok(PropertyAccess::new(
+                    build_py(py, obj.get("expression").unwrap_or(&Value::Null))?,
+                    obj.get("attribute_path").and_then(Value::as_array).unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| build_py(py, v))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    obj.get("default").map(|v| build_py(py, v)).transpose()?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "SearchNixPath" => Ok(SearchNixPath::new(
+                    obj.get("path").and_then(Value::as_str).unwrap_or_default().to_string(),
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "NixString" => Ok(NixString::new(
+                    obj.get("parts").and_then(Value::as_array).unwrap_or(&vec![])
+                        .iter()
+                        .map(|v| build_py(py, v))
+                        .collect::<Result<Vec<_>, _>>()?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "UnaryOperation" => Ok(UnaryOperation::new(
+                    build_py(py, obj.get("operator").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("operand").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "With" => Ok(With::new(
+                    build_py(py, obj.get("expression").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("target").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "BindingInherit" => Ok(BindingInherit::new(
+                    obj.get("from").map(|v| build_py(py, v)).transpose()?,
+                    build_py(py, obj.get("attributes").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("span").unwrap_or(&Value::Null))?.extract(py)?,
+                ).into_py(py)),
+
+                "BindingKeyValue" => Ok(BindingKeyValue::new(
+                    build_py(py, obj.get("from").unwrap_or(&Value::Null))?,
+                    build_py(py, obj.get("to").unwrap_or(&Value::Null))?,
+                ).into_py(py)),
+
+                _ => {
+                    let dict = PyDict::new_bound(py);
+                    for (k, v) in obj {
+                        dict.set_item(k, build_py(py, v)?)?;
+                    }
+                    Ok(dict.into_py(py))
+                }
+            }
+        }
+    }
+}
 
 pub fn json_to_py(py: Python, value: Value) -> PyObject {
     match value {
@@ -111,12 +363,8 @@ pub fn parse_nix(py: Python, nix_script: String) -> PyResult<PyObject> {
     let parsed = nixel::parse(nix_script);
     let json_value = serde_json::to_value(&parsed)
         .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string()))?;
-
-    let py_dict = PyDict::new_bound(py);
-    if let Value::Object(map) = json_value {
-        for (key, value) in map {
-            py_dict.set_item(key, json_to_py(py, value))?;
-        }
-    }
-    Ok(py_dict.into_py(py))
+    
+    let ast = build_py(py, &json_value)?;
+    println!("{:?}", ast);
+    Ok(ast)
 }

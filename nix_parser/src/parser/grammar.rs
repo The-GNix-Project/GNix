@@ -22,8 +22,8 @@ impl fmt::Display for Position {
 #[pymethods]
 impl Position {
     #[new]
-    fn new(line: i64, column: i64) -> Self { Self { line, column } }
-    fn __repr__(&self) -> String { format!("{}", self) }
+    pub fn new(line: i64, column: i64) -> Self { Self { line, column } }
+    pub fn __repr__(&self) -> String { format!("{}", self) }
 }
 // MARK: Span
 #[pyclass]
@@ -44,8 +44,8 @@ impl fmt::Display for Span {
 #[pymethods]
 impl Span {
     #[new]
-    fn new(start: Position, end: Position) -> Self { Self { start, end } }
-    fn __repr__(&self) -> String { format!("{}", self) }
+    pub fn new(start: Position, end: Position) -> Self { Self { start, end } }
+    pub fn __repr__(&self) -> String { format!("{}", self) }
 }
 // MARK: Identifier
 #[pyclass]
@@ -66,8 +66,8 @@ impl fmt::Display for Identifier {
 #[pymethods]
 impl Identifier {
     #[new]
-    fn new(id: String, span: Span) -> Self { Self { id, span } }
-    fn __repr__(&self) -> String { format!("{}", self.id) }
+    pub fn new(id: String, span: Span) -> Self { Self { id, span } }
+    pub fn __repr__(&self) -> String { format!("{}", self.id) }
 }
 // MARK: ERROR
 #[pyclass]
@@ -82,11 +82,11 @@ pub struct Error {
 #[pymethods]
 impl Error {
     #[new]
-    fn new(message: String, span: Span) -> Self {
+    pub fn new(message: String, span: Span) -> Self {
         Error { message, span }
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("Error('{}')", self.message)
     }
 }
@@ -103,11 +103,11 @@ pub struct Float {
 #[pymethods]
 impl Float {
     #[new]
-    fn new(value: String, span: Span) -> Self {
+    pub fn new(value: String, span: Span) -> Self {
         Float { value, span }
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("Float('{}')", self.value)
     }
 }
@@ -124,10 +124,10 @@ pub struct Integer {
 #[pymethods]
 impl Integer {
     #[new]
-    fn new(value: String, span: Span) -> Self {
+    pub fn new(value: String, span: Span) -> Self {
         Integer { value, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("Integer('{}')", self.value)
     }
 }
@@ -142,9 +142,9 @@ macro_rules! impl_operator {
             pub struct $name;
             #[pymethods]
             impl $name {
-                #[new] fn new() -> Self { Self }
-                #[classattr] fn value() -> &'static str { stringify!($name) }
-                fn __repr__(&self) -> String { format!("{}", stringify!($name)) }
+                #[new] pub fn new() -> Self { Self }
+                #[classattr] pub fn value() -> &'static str { stringify!($name) }
+                pub fn __repr__(&self) -> String { format!("{}", stringify!($name)) }
             }
         )+
     };
@@ -181,11 +181,11 @@ impl Clone for FunctionHeadDestructuredArgument {
 #[pymethods]
 impl FunctionHeadDestructuredArgument {
     #[new]
-    fn new(identifier: String, default: Option<PyObject>) -> Self {
+    pub fn new(identifier: String, default: Option<PyObject>) -> Self {
         FunctionHeadDestructuredArgument { identifier, default }
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!(
             "FunctionHeadDestructuredArgument(identifier='{}', default={:?})",
             self.identifier, self.default
@@ -209,10 +209,10 @@ pub struct FunctionHeadDestructured {
 #[pymethods]
 impl FunctionHeadDestructured {
     #[new]
-    fn new(ellipsis: bool, identifier: Identifier, arguments: FunctionHeadDestructuredArgument, span: Span) -> Self {
+    pub fn new(ellipsis: bool, identifier: Identifier, arguments: FunctionHeadDestructuredArgument, span: Span) -> Self {
         Self { ellipsis, identifier, arguments, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("FunctionHeadDestructured(ellipsis={})", self.ellipsis)
     }
 }
@@ -229,11 +229,11 @@ pub struct FunctionHeadSimple {
 #[pymethods]
 impl FunctionHeadSimple {
     #[new]
-    fn new(identifier: Identifier, span: Span) -> Self {
+    pub fn new(identifier: Identifier, span: Span) -> Self {
         FunctionHeadSimple { identifier, span }
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("FunctionHeadSimple(identifier={}, span={})", self.identifier, self.span)
     }
 }
@@ -263,10 +263,10 @@ impl Clone for Function {
 #[pymethods]
 impl Function {
     #[new]
-    fn new(head: PyObject, body: PyObject, span: Span) -> Self {
+    pub fn new(head: PyObject, body: PyObject, span: Span) -> Self {
         Function { head, body, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("Function({:?}, {:?})", self.head, self.body)
     }
 }
@@ -298,7 +298,7 @@ impl Clone for FunctionApplication {
 #[pymethods]
 impl FunctionApplication {
     #[new]
-    fn new(function: PyObject, arguments: PyObject, span: Span) -> Self {
+    pub fn new(function: PyObject, arguments: PyObject, span: Span) -> Self {
         FunctionApplication {
             function,
             arguments,
@@ -306,7 +306,7 @@ impl FunctionApplication {
         }
     }
 
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!(
             "FunctionApplication(function={:?}, arguments={:?})",
             self.function, self.arguments
@@ -339,10 +339,10 @@ impl Clone for PartInterpolation {
 #[pymethods]
 impl PartInterpolation {
     #[new]
-    fn new(expression: PyObject, span: Span) -> Self {
+    pub fn new(expression: PyObject, span: Span) -> Self {
         PartInterpolation { expression, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("PartInterpolation({:?})", self.expression)
     }
 }
@@ -359,10 +359,10 @@ pub struct PartRaw {
 #[pymethods]
 impl PartRaw {
     #[new]
-    fn new(content: String, span: Span) -> Self {
+    pub fn new(content: String, span: Span) -> Self {
         PartRaw { content, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("PartRaw('{}')", self.content)
     }
 }
@@ -398,10 +398,10 @@ impl Clone for BinaryOperation {
 #[pymethods]
 impl BinaryOperation {
     #[new]
-    fn new(left: PyObject, operator: PyObject, right: PyObject, span: Span) -> Self {
+    pub fn new(left: PyObject, operator: PyObject, right: PyObject, span: Span) -> Self {
         Self { left, operator, right, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("BinaryOperation({:?}, {:?}, {:?})", self.left, self.operator, self.right)
     }
 }
@@ -432,10 +432,10 @@ impl Clone for Assert {
 #[pymethods]
 impl Assert {
     #[new]
-    fn new(expression: PyObject, target: PyObject, span: Span) -> Self {
+    pub fn new(expression: PyObject, target: PyObject, span: Span) -> Self {
         Self { expression, target, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("Assert(expr={:?}, target={:?})", self.expression, self.target)
     }
 }
@@ -467,10 +467,10 @@ impl Clone for HasAttribute {
 #[pymethods]
 impl HasAttribute {
     #[new]
-    fn new(expression: PyObject, attribute_path: Vec<PyObject>, span: Span) -> Self {
+    pub fn new(expression: PyObject, attribute_path: Vec<PyObject>, span: Span) -> Self {
         HasAttribute { expression, attribute_path, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("HasAttribute({:?})", self.attribute_path)
     }
 }
@@ -497,10 +497,10 @@ impl Clone for IndentedString {
 #[pymethods]
 impl IndentedString {
     #[new]
-    fn new(parts: Vec<PyObject>, span: Span) -> Self {
+    pub fn new(parts: Vec<PyObject>, span: Span) -> Self {
         IndentedString { parts, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("IndentedString({:?})", self.parts)
     }
 }
@@ -533,10 +533,10 @@ impl Clone for IfThenElse {
 #[pymethods]
 impl IfThenElse {
     #[new]
-    fn new(predicate: PyObject, then: PyObject, else_: PyObject, span: Span) -> Self {
+    pub fn new(predicate: PyObject, then: PyObject, else_: PyObject, span: Span) -> Self {
         Self { predicate, then, else_, span }
     }
-    fn __repr__(&self) -> String { format!("IfThenElse({}, {}, {})", self.predicate, self.then, self.else_) }
+    pub fn __repr__(&self) -> String { format!("IfThenElse({}, {}, {})", self.predicate, self.then, self.else_) }
 }
 // MARK: LetIn
 #[pyclass]
@@ -564,10 +564,10 @@ impl Clone for LetIn {
 #[pymethods]
 impl LetIn {
     #[new]
-    fn new(bindings: Vec<PyObject>, target: PyObject, span: Span) -> Self {
+    pub fn new(bindings: Vec<PyObject>, target: PyObject, span: Span) -> Self {
         Self { bindings, target, span }
     }
-    fn __repr__(&self) -> String { format!("LetIn({:?})", self.bindings) }
+    pub fn __repr__(&self) -> String { format!("LetIn({:?})", self.bindings) }
 }
 
 // ==================== COLLECTIONS ====================
@@ -594,10 +594,10 @@ impl Clone for List {
 #[pymethods]
 impl List {
     #[new]
-    fn new(elements: Vec<PyObject>, span: Span) -> Self {
+    pub fn new(elements: Vec<PyObject>, span: Span) -> Self {
         List { elements, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("List({:?})", self.elements)
     }
 }
@@ -627,10 +627,10 @@ impl Clone for Map {
 #[pymethods]
 impl Map {
     #[new]
-    fn new(recursive: bool, bindings: Vec<PyObject>, span: Span) -> Self {
+    pub fn new(recursive: bool, bindings: Vec<PyObject>, span: Span) -> Self {
         Map { recursive, bindings, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("Map(recursive={}, {:?})", self.recursive, self.bindings)
     }
 }
@@ -659,10 +659,10 @@ impl Clone for Path {
 #[pymethods]
 impl Path {
     #[new]
-    fn new(parts: Vec<PyObject>, span: Span) -> Self {
+    pub fn new(parts: Vec<PyObject>, span: Span) -> Self {
         Path { parts, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("Path({:?})", self.parts)
     }
 }
@@ -679,10 +679,10 @@ pub struct Uri {
 #[pymethods]
 impl Uri {
     #[new]
-    fn new(uri: String, span: Span) -> Self {
+    pub fn new(uri: String, span: Span) -> Self {
         Uri { uri, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("Uri('{}')", self.uri)
     }
 }
@@ -717,10 +717,10 @@ impl Clone for PropertyAccess {
 #[pymethods]
 impl PropertyAccess {
     #[new]
-    fn new(expression: PyObject, attribute_path: Vec<PyObject>, default: Option<PyObject>, span: Span) -> Self {
+    pub fn new(expression: PyObject, attribute_path: Vec<PyObject>, default: Option<PyObject>, span: Span) -> Self {
         PropertyAccess { expression, attribute_path, default, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("PropertyAccess({:?}, {:?}, {:?})", self.expression, self.attribute_path, self.default)
     }
 }
@@ -739,10 +739,10 @@ pub struct SearchNixPath {
 #[pymethods]
 impl SearchNixPath {
     #[new]
-    fn new(path: String, span: Span) -> Self {
+    pub fn new(path: String, span: Span) -> Self {
         SearchNixPath { path, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("SearchNixPath('{}')", self.path)
     }
 }
@@ -770,10 +770,10 @@ impl Clone for NixString {
 #[pymethods]
 impl NixString {
     #[new]
-    fn new(parts: Vec<PyObject>, span: Span) -> Self {
+    pub fn new(parts: Vec<PyObject>, span: Span) -> Self {
         NixString { parts, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("String({:?})", self.parts)
     }
 }
@@ -803,10 +803,10 @@ impl Clone for UnaryOperation {
 #[pymethods]
 impl UnaryOperation {
     #[new]
-    fn new(operator: PyObject, operand: PyObject, span: Span) -> Self {
+    pub fn new(operator: PyObject, operand: PyObject, span: Span) -> Self {
         UnaryOperation { operator, operand, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("UnaryOperation({:?})", self.operator)
     }
 }
@@ -836,10 +836,10 @@ impl Clone for With {
 #[pymethods]
 impl With {
     #[new]
-    fn new(expression: PyObject, target: PyObject, span: Span) -> Self {
+    pub fn new(expression: PyObject, target: PyObject, span: Span) -> Self {
         With { expression, target, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("With({:?})", self.expression)
     }
 }
@@ -871,10 +871,10 @@ impl Clone for BindingInherit {
 #[pymethods]
 impl BindingInherit {
     #[new]
-    fn new(from_: Option<PyObject>, attributes: PyObject, span: Span) -> Self {
+    pub fn new(from_: Option<PyObject>, attributes: PyObject, span: Span) -> Self {
         BindingInherit { from_, attributes, span }
     }
-    fn __repr__(&self) -> String {
+    pub fn __repr__(&self) -> String {
         format!("BindingInherit(from={:?})", self.from_.is_some())
     }
 }
@@ -901,6 +901,6 @@ impl Clone for BindingKeyValue {
 #[pymethods]
 impl BindingKeyValue {
     #[new]
-    fn new(from_: PyObject, to: PyObject) -> Self { Self { from_, to } }
-    fn __repr__(&self) -> String { format!("KeyValue({:?})", self.from_) }
+    pub fn new(from_: PyObject, to: PyObject) -> Self { Self { from_, to } }
+    pub fn __repr__(&self) -> String { format!("KeyValue({:?})", self.from_) }
 }

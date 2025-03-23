@@ -1,11 +1,11 @@
-mod grammar;
-mod utils;
+pub mod parser;
+pub mod utils;
 
 use pyo3::prelude::*;
 use pyo3::Bound;
 use pyo3::wrap_pyfunction;
 
-use grammar::*;
+use parser::grammar::*;
 use utils::*;
 
 /// Define the Python module.

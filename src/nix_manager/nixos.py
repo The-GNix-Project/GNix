@@ -44,9 +44,6 @@ class nixosConfigDirectory:
             self.existing_config_files.append("/etc/nixos/configuration.nix")
             with open("/etc/nixos/configuration.nix") as f:
                 pass
-                # existing_config = parse(f.read())
-                # check for modules
-                # parse modules, recurse all module dependencies
     
     def folder_structure(self, name):
         if os.path.isfile(FOLDER_TEMPLATES_PATH + f"/{name}.yaml"):

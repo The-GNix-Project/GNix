@@ -474,6 +474,7 @@ impl HasAttribute {
         format!("HasAttribute({:?})", self.attribute_path)
     }
 }
+
 // MARK: IndentedString
 #[pyclass]
 pub struct IndentedString {

@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/icons">
+    <file>assets/icons/back_arrow.png</file>
+    <file>assets/icons/nix.png</file>
+    <file>assets/icons/folder.png</file>
+  </qresource>
+</RCC>

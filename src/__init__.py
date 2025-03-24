@@ -1,7 +1,9 @@
-import os
-# IMPORTANT, SET ENVIRONMENT VARIABLES HERE
-# os.environ['KIVY_TEXT'] = 'pil' 
-
-import kivy
-
 from .app import GNix
+from PyQt5.QtWidgets import QApplication
+import sys
+
+def main():
+    app = QApplication(sys.argv)
+    window = GNix()
+    window.show()
+    sys.exit(app.exec_())

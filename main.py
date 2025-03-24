@@ -1,3 +1,3 @@
-from nix_parser import parse_nix
+from src import main
 
-print(type(parse_nix("{a, b, c}: {g = with pkgs; [a b c];}")))
+main()

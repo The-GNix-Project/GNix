@@ -12,10 +12,10 @@ class GNix(QMainWindow):
 
         # Create a stacked widget
         self.stacked_widget = QStackedWidget(self)
-        self.init_nixos_button = QPushButton("New Nixos Config", self)
+        # self.init_nixos_button = QPushButton("New Nixos Config", self)
 
         self.model = QVBoxLayout()
-        self.model.addWidget(self.init_nixos_button)
+        # self.model.addWidget(self.init_nixos_button)
         nav_widget = QWidget()
         nav_widget.setLayout(self.model)
         main_layout = QVBoxLayout()
@@ -26,7 +26,8 @@ class GNix(QMainWindow):
         self.setCentralWidget(central_widget)
         
         self.load_pages()
-        self.stacked_widget.setCurrentWidget(self.init_nixos_button)
+        self.stacked_widget.setCurrentWidget(self.init_nixos_config)
     
     def load_pages(self):
         self.init_nixos_config = InitNixosConfig()
+        self.stacked_widget.addWidget(self.init_nixos_config)

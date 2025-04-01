@@ -6,6 +6,30 @@ import yaml
 
 from nix_parser import parse_nix, find_key_pair
 
+{
+    "configurationName": "name",
+    "configurationLocation": "location",
+    "git": True,
+    "github": True,
+    "gitlab": True,
+    "flakes": True,
+    "homeManager": True,
+    "existingConfig": "location",
+    "existingHConfig": "location",
+    "directoryTree": [
+        {"hosts": {
+            "host1": ["hardware-configuration.nix", "configuration.nix"]
+        }},
+        {"users": {
+            "user1": []
+        }},
+        {"modules": {
+            "module1": "default.nix"
+        }},
+        "flake.nix"
+    ]
+}
+
 def nixos_config_init(path: str):
     BASH_PATH = "src/nix_manager/bash/nix_config_init.sh"
     try:

@@ -1,8 +1,10 @@
 # GNix - The Graphical Nix Project
-An all encompassing Graphical Management interface for Nix and Nixos. Designed to improve on the shortcomings of existing graphical interfaces
-
-## Heavy Development
-This project is still in the early stages of development. Due to the complicated nature of Nix and Nixos, and the endless rabbit holes that you can go down with the package manager, it is a very difficult to make an centralized configuration interface that is easy for anyone to use. Many have tried, however most end up unmaintained or restricted in their use cases. Let's see where this goes!
+<div style="display: flex; align-items: flex-start;">
+  <img src="src/assets/images/gnix_robot.png" width="100" style="margin-right: 10px;" align="right">
+  <p>
+    The Graphical Nix Project is a project that aims to create effective, all-encompassing graphical interfaces for the Nix package manager and the Nix programming language. This project is still in the early stages of development. Due to the complicated nature of Nix and NixOS, and the endless rabbit holes that you can go down with the package manager, it is very difficult to make a centralized configuration interface that is easy for anyone to use. Many have tried; however, most end up unmaintained or restricted in their use cases. Let's see where this goes!
+  </p>
+</div>
 
 ## Goals
 What Gnix is:

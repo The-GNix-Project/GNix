@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QTreeView, QPushButton, QFileDialog, QLineEdit, QCheckBox, QToolTip
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon
-from PyQt5.QtCore import QPoint, QTimer
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon, QRegularExpressionValidator
+from PyQt5.QtCore import QPoint, QTimer, QRegularExpression
 from PyQt5.uic import loadUi
 
 import socket
@@ -25,8 +25,8 @@ class InitNixosConfig(QWidget):
         self.enableGitlab: QCheckBox
         self.returnButton: QPushButton
         self.nextButton: QPushButton
-        self.block_checkbox_change = False
-
+        self.configName: QLineEdit
+        
         super().__init__()
         loadUi("src/pages/Main_Window-New_Nixos_Config.ui", self)
         
@@ -68,9 +68,22 @@ class InitNixosConfig(QWidget):
         self.existingConfigLocation.clicked.connect(self.handle_file(self.existingConfig))
         self.existingHardwareConfigLocation.clicked.connect(self.handle_file(self.existingHardwareConfig))
         
+        dir_regex = QRegularExpression(r"^(/?|(\.?\.?/)?[a-zA-Z0-9._-]+(/?[a-zA-Z0-9._-]+)*)/?$")
+        file_regex = QRegularExpression(r"^(/?|(\.?\.?/)?[a-zA-Z0-9._-]+(/?[a-zA-Z0-9._-]+)*\.[a-zA-Z0-9_-]+)$")
+        file_validator = QRegularExpressionValidator(file_regex, self.existingConfig)
+        self.existingConfig.setValidator(file_validator)
+        file_validator = QRegularExpressionValidator(file_regex, self.existingHardwareConfig)
+        self.existingHardwareConfig.setValidator(file_validator)
+        dir_validator = QRegularExpressionValidator(dir_regex, self.newConfig)
+        self.newConfig.setValidator(dir_validator)
+        
         self.enableGitlab.stateChanged.connect(self.handle_enable_gitlab)
         self.enableGithub.stateChanged.connect(self.handle_enable_github)
         self.enableGit.stateChanged.connect(self.handle_disable_git)
+        
+        regex = QRegularExpression("[a-z-A-Z_]+")
+        configName_validator = QRegularExpressionValidator(regex, self.configName)
+        self.configName.setValidator(configName_validator)
     
     def handle_file(self, target: QLineEdit, prompt: str = "Open File", initial_path: str = "~/", file_type=None):
         """Returns a function object that will be a handler for opening a file browser that returns a file
@@ -183,4 +196,17 @@ class InitNixosConfig(QWidget):
         ```
         """
         config = {}
+        config["configurationName"] = self.configName.text()
+        config["configurationLocation"] = self.newConfig.text()
+        config["git"] = self.enableGit.isChecked()
+        config["github"] = self.enableGithub.isChecked()
+        config["gitlab"] = self.enableGitlab.isChecked()
+        config["flakes"] = self.enableFlakes.isChecked()
+        config["homeManager"] = self.enableHomeManager.isChecked()
+        config["existingConfig"] = self.existingConfig.text()
+        config["existingHConfig"] = self.existingHardwareConfig.text()
+        config["directoryTree"] = [
+            
+        ]
+        
         

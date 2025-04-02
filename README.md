@@ -1,4 +1,4 @@
-# GNix - Graphical Nix
+# GNix - The Graphical Nix Project
 An all encompassing Graphical Management interface for Nix and Nixos. Designed to improve on the shortcomings of existing graphical interfaces
 
 ## Heavy Development

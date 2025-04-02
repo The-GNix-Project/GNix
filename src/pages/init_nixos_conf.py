@@ -1,30 +1,35 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # This file is part of GNix.
-#
-# GNix is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or any later version.
-#
-# GNix is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with GNix.  If not, see <https://www.gnu.org/licenses/>.
+#########################################################################################
+# GNix - The Graphical Nix Project                                                      #
+#---------------------------------------------------------------------------------------#
+# GNix is free software: you can redistribute it and/or modify                          #
+# it under the terms of the GNU General Public License as published by                  #
+# the Free Software Foundation, either version 3 of the License, or any later version.  #
+#                                                                                       #
+# GNix is distributed in the hope that it will be useful,                               #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of                        #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                         #
+# GNU General Public License for more details.                                          #
+#                                                                                       #
+# You should have received a copy of the GNU General Public License                     #
+# along with GNix.  If not, see <https://www.gnu.org/licenses/>.                        #
+#########################################################################################
+import socket
 
-from PyQt5.QtWidgets import QWidget, QTreeView, QPushButton, QFileDialog, QLineEdit, QCheckBox, QToolTip
+from PyQt5.QtWidgets import QWidget, QTreeView, QPushButton, QFileDialog, QLineEdit, QCheckBox, QToolTip, QLabel, QComboBox
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QIcon, QRegularExpressionValidator
 from PyQt5.QtCore import QPoint, QTimer, QRegularExpression
 from PyQt5.uic import loadUi
 
-import socket
+from ..nix_manager.nixos_folder_templates.templates import TEMPLATES
 
 HOSTNAME = socket.gethostname()
 
 class InitNixosConfig(QWidget):
-    def __init__(self):
+    """InitNixosConfig QWidget, widget contain the GUI for creating a new Nixos Configuration"""
+    def __init__(self) -> None:
         # Type Hints for .ui defined objects
         self.configOverview: QTreeView
         self.newConfigLocation: QPushButton
@@ -42,9 +47,11 @@ class InitNixosConfig(QWidget):
         self.returnButton: QPushButton
         self.nextButton: QPushButton
         self.configName: QLineEdit
+        self.gnixRobot: QLabel
+        self.folderStructure: QComboBox
         
         super().__init__()
-        loadUi("src/pages/Main_Window-New_Nixos_Config.ui", self)
+        loadUi("src/pages/New_Nixos_Config.ui", self)
         
         self.model = QStandardItemModel()
         self.configOverview.setModel(self.model)
@@ -77,15 +84,14 @@ class InitNixosConfig(QWidget):
         exampleUser.appendRow([userPlaceholder])
         usersFolder.appendRow([exampleUser])
 
-        # Append folders to the root node
         rootNode.appendRows([hostsFolder, modulesFolder, usersFolder, QStandardItem(nixIcon, "flake.nix")])
 
         self.newConfigLocation.clicked.connect(self.handle_directory(self.newConfig))
         self.existingConfigLocation.clicked.connect(self.handle_file(self.existingConfig))
         self.existingHardwareConfigLocation.clicked.connect(self.handle_file(self.existingHardwareConfig))
         
-        dir_regex = QRegularExpression(r"^(/?|(\.?\.?/)?[a-zA-Z0-9._-]+(/?[a-zA-Z0-9._-]+)*)/?$")
-        file_regex = QRegularExpression(r"^(/?|(\.?\.?/)?[a-zA-Z0-9._-]+(/?[a-zA-Z0-9._-]+)*\.[a-zA-Z0-9_-]+)$")
+        dir_regex = QRegularExpression(r"^(/?|(\.?\.?/)?[a-zA-Z0-9._-]+(/?[a-zA-Z0-9._-]+)*)/?$") # only allow valid linux directories
+        file_regex = QRegularExpression(r"^(/?|(\.?\.?/)?[a-zA-Z0-9._-]+(/?[a-zA-Z0-9._-]+)*\.[a-zA-Z0-9_-]+)$") # only allow valid linux directories
         file_validator = QRegularExpressionValidator(file_regex, self.existingConfig)
         self.existingConfig.setValidator(file_validator)
         file_validator = QRegularExpressionValidator(file_regex, self.existingHardwareConfig)
@@ -100,6 +106,16 @@ class InitNixosConfig(QWidget):
         regex = QRegularExpression("[a-z-A-Z_]+")
         configName_validator = QRegularExpressionValidator(regex, self.configName)
         self.configName.setValidator(configName_validator)
+        
+        self.folderStructure.currentTextChanged.connect(self.handle_folder_structure_change)
+    
+    def handle_folder_structure_change(self, value) -> None:
+        """handles the folder structure template being changed
+
+        :param value: value changed to
+        :type value: Any
+        """
+        
     
     def handle_file(self, target: QLineEdit, prompt: str = "Open File", initial_path: str = "~/", file_type=None):
         """Returns a function object that will be a handler for opening a file browser that returns a file
@@ -221,8 +237,6 @@ class InitNixosConfig(QWidget):
         config["homeManager"] = self.enableHomeManager.isChecked()
         config["existingConfig"] = self.existingConfig.text()
         config["existingHConfig"] = self.existingHardwareConfig.text()
-        config["directoryTree"] = [
-            
-        ]
+        config["directoryTree"] = []
         
         

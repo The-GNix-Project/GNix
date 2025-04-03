@@ -1,3 +1,22 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# This file is part of GNix.
+#########################################################################################
+# GNix - The Graphical Nix Project                                                      #
+#---------------------------------------------------------------------------------------#
+# GNix is free software: you can redistribute it and/or modify                          #
+# it under the terms of the GNU General Public License as published by                  #
+# the Free Software Foundation, either version 3 of the License, or any later version.  #
+#                                                                                       #
+# GNix is distributed in the hope that it will be useful,                               #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of                        #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                         #
+# GNU General Public License for more details.                                          #
+#                                                                                       #
+# You should have received a copy of the GNU General Public License                     #
+# along with GNix.  If not, see <https://www.gnu.org/licenses/>.                        #
+#########################################################################################
+
 # from nix_parser import parse
 from typing import List
 from subprocess import run, CalledProcessError
@@ -5,6 +24,30 @@ import os
 import yaml
 
 from nix_parser import parse_nix, find_key_pair
+
+{
+    "configurationName": "name",
+    "configurationLocation": "location",
+    "git": True,
+    "github": True,
+    "gitlab": True,
+    "flakes": True,
+    "homeManager": True,
+    "existingConfig": "location",
+    "existingHConfig": "location",
+    "directoryTree": [
+        {"hosts": {
+            "host1": ["hardware-configuration.nix", "configuration.nix"]
+        }},
+        {"users": {
+            "user1": []
+        }},
+        {"modules": {
+            "module1": "default.nix"
+        }},
+        "flake.nix"
+    ]
+}
 
 def nixos_config_init(path: str):
     BASH_PATH = "src/nix_manager/bash/nix_config_init.sh"
@@ -44,9 +87,6 @@ class nixosConfigDirectory:
             self.existing_config_files.append("/etc/nixos/configuration.nix")
             with open("/etc/nixos/configuration.nix") as f:
                 pass
-                # existing_config = parse(f.read())
-                # check for modules
-                # parse modules, recurse all module dependencies
     
     def folder_structure(self, name):
         if os.path.isfile(FOLDER_TEMPLATES_PATH + f"/{name}.yaml"):

@@ -276,7 +276,7 @@
     </widget>
    </item>
    <item row="11" column="2" colspan="2">
-    <widget class="QPushButton" name="pushButton_3">
+    <widget class="QPushButton" name="nextButton">
      <property name="text">
       <string>PushButton</string>
      </property>
@@ -340,7 +340,7 @@
     <widget class="QLineEdit" name="existingHardwareConfig"/>
    </item>
    <item row="1" column="1">
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="returnButton">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>
